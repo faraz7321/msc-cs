@@ -1,0 +1,81 @@
+#import "@preview/finite:0.5.0": automaton
+
+=== 1.
+
+#{
+  let opt = x => $(#x | emptyset)$
+  let digit = $[0-9]$
+  let digit-sequence = $#digit^+$
+  let fractional-constant = $#digit^* "." #digit-sequence$
+  let sign = $[-+]$
+  let exponent-part = $["e" "E"] #opt(sign) #digit-sequence$
+  let floating-suffix = $["f" "l" "F" "L"]$
+  let decimal-floating-constant = $(#fractional-constant #opt(exponent-part) | #digit-sequence #exponent-part)$
+  let hexadecimal-prefix = $("0x"|"0X")$
+  let hexadecimal-digit = $[0-9 space "a"-"f" space "A"-"F"]$
+  let hexadecimal-digit-sequence = $#hexadecimal-digit^+$
+  let hexadecimal-fractional-constant = $(#hexadecimal-digit^* "." #hexadecimal-digit-sequence | #hexadecimal-digit-sequence ".")$
+  let binary-exponent-part = $["p" "P"] #opt(sign) #digit-sequence$
+  let hexadecimal-floating-constant = $(#hexadecimal-prefix (#hexadecimal-fractional-constant | #hexadecimal-digit-sequence) \ #binary-exponent-part )$
+  let floating-constant = $(#decimal-floating-constant | \ #hexadecimal-floating-constant) \ #opt(floating-suffix)$
+
+  floating-constant
+}
+
+Note: We use the extension for character classes, but "." matches a literal ".".
+Sorry that it's so long. Maybe it's easier to read the typst code ;) .
+
+=== 2.
+
+With this rule, the NFSM
+
+#figure(automaton(
+  (
+    q0: (qf: none),
+    qf: (),
+  ),
+  initial: none,
+  labels: (
+    q0-qf: $"a" | "b"^*$,
+  ),
+  style: (
+    q0: (label: (text: $"q"_0$)),
+    qf: (label: (text: $"q"_f$)),
+  ),
+  final: ("qf",),
+))
+
+would expand to
+
+#figure(automaton(
+  (
+    q0: (q1: "", qf: ("", "a")),
+    q1: (qf: "b"),
+    qf: (q1: ""),
+  ),
+  initial: none,
+  style: (
+    q0: (label: (text: $"q"_0$)),
+    q1: (label: (text: $"q"_1$)),
+    qf: (label: (text: $"q"_f$)),
+    q1-qf: (label: (text: $"b"$)),
+    qf-q1: (label: (text: $epsilon$, dist: -0.33)),
+    q0-q1: (label: (text: $epsilon$), curve: 0),
+    q0-qf: (label: (text: $epsilon, "a"$), curve: -2),
+  ),
+  final: ("qf",),
+))
+
+But this also accepts "abbbb".
+
+=== 3.
+
+$(r_1 | emptyset) = R_1 union emptyset = R_1$
+
+$(r_1 epsilon) = {x.y | x in R_1, y in {epsilon}} = {x.epsilon | x in R_1} = {x | x in R_1} = R_1$
+
+=== 4.
+
+$X = {epsilon}$ for all $L$:
+
+$X = L^* \\ L^+ = L^* \\ (L^* \\ L^0) = L^0 = {epsilon}$

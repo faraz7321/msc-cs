@@ -1,0 +1,11 @@
+<!-- Library catalog -->
+<library>
+	<book id="42">
+		<title>The Hitchhiker’s Guide to the Galaxy</title>
+			<author>Douglas Adams</author>
+			<year>1979</year>
+			<publisher>Pan Books</publisher>
+			<genre>Science Fiction</genre>
+			<quote>"Don’t Panic!"</quote>
+	</book>
+</library>
